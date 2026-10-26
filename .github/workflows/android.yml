@@ -5,6 +5,9 @@ on:
     paths: ["android/**", ".github/workflows/android.yml"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,7 +20,15 @@ jobs:
       - name: Build debug APK
         working-directory: android
         run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - name: Rename
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk drip.apk
       - uses: actions/upload-artifact@v4
         with:
           name: drip-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: drip.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Drip latest build
+          files: drip.apk
+          prerelease: true
